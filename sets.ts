@@ -26,8 +26,27 @@ export interface WithOps<T> extends Set<T> {
     toSet: () => Set<T>
     toArray: () => Array<T>
 
-    map: (callback: (value: T, index: number, s: SetLike<T>) => T) => WithOps<T>,
-    filter: (callback: (value: T, index: number, s: SetLike<T>) => boolean) => WithOps<T>,
+    /**
+     * Maps the set into a new set by applying the callback function to each element in the set
+     * @param callback The callback function applied to each element
+     * @return A new set (with ops) of transformed elements
+     */
+    map: (callback: (value: T, index: number, s: SetLike<T>) => T) => WithOps<T>
+    /**
+     * Calculates a new set containing only the elements the match the predicate function
+     * @param callback The callback predicate function
+     * @return A new set (with ops) with only the elements that match the predicate
+     */
+    filter: (callback: (value: T, index: number, s: SetLike<T>) => boolean) => WithOps<T>
+    /**
+     * Calculates a value from the set by applying the reducing function to the elements
+     * @param callback The reducing callback
+     * @return A value calculated by applying the callback function
+     * @example
+     *     const A = setFrom([1,2,3,4,5,6,7,8,9,10])
+     *     const sum: number = A.reduce((sum, value) => sum += value)
+     */
+    reduce: (callback: (accum: T, current: T, index: number, s: SetLike<T>) => T) => T
 
     /**
      * Calculates the elements of this set that are not in the set `b`. For example, if
@@ -124,9 +143,12 @@ export function emptySet<T>(comparator?: (a: T, b: T) => boolean): WithOps<T> {
 }
 
 /**
- * Constructs a Set object with additional set operations
+ * Constructs a Set object with additional set operations.
  * @param collection The collection of elements
- * @param comparator An optional comparator when building sets of objects
+ * @param comparator An optional comparator when building sets of objects. When constructing
+ * sets of objects, arrays, or tuples, it is good practice supplying a comparator that defines
+ * the equality of elements in the set. Without the comparator, equality is based on the object
+ * reference, and the results will be unexpected.
  * @return A Set with operations
  */
 export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) => boolean): WithOps<T> {
@@ -140,6 +162,11 @@ export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) 
     function filter(callback: (value: T, index: number, s: SetLike<T>) => boolean): WithOps<T> {
         const fn = (value: T, index: number, array: Array<T>) => callback(value, index, convertToSet(array))
         return setFrom(convertToArray(set).filter(fn), comparator)
+    }
+
+    function reduce(callback: (accum: T, current: T, index: number, s: SetLike<T>) => T): T {
+        const fn = (accum: T, current: T, index: number, array: Array<T>) => callback(accum, current, index, convertToSet(array))
+        return convertToArray(set).reduce(fn)
     }
 
     function compliment(b: SetLike<T>): WithOps<T> {
@@ -183,6 +210,7 @@ export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) 
 
         map,
         filter,
+        reduce,
 
         isEmpty: () => set.size === 0,
         nonEmpty: () => set.size > 0,

@@ -43,6 +43,11 @@ test("should be able to filter a set", () => {
     expect(mapped.toArray()).toEqual([2, 4])
 })
 
+test("should be able to reduce a set", () => {
+    const A = setFrom([1,2,3,4,5,6,7,8,9,10])
+    expect(A.reduce((sum, value) => sum += value)).toBe(55)
+})
+
 test("should be able to calculate the union of sets", () => {
     const A = setFrom([1, 2, 3, 4])
     const B = setFrom([3, 4, 5, 6, 7])
