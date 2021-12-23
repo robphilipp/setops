@@ -11,7 +11,7 @@
   "scripts": {
     "prepare": "npm run build",
     "build": "tsc",
-    "test": "jest src/*.test.ts"
+    "test": "jest sets.test.ts"
   },
   "eslintConfig": {
     "extends": "react-app"
