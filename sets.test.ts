@@ -158,3 +158,24 @@ test("should be able to test subset and equality", () => {
     expect(emptySet().isProperSubsetOf(emptySet())).toBeFalsy()
     expect(emptySet().isSubsetOf(emptySet())).toBeTruthy()
 })
+
+function testSetSize(a: Set<number>): number {
+    return a.size
+}
+
+test("should be able to call a function that accepts a Set", () => {
+    expect(testSetSize(setFrom([1,2,3,4]))).toBe(4)
+})
+
+test("should be able to check membership of objects", () => {
+    const comparator = (a: [number, string], b: [number, string]) => a[0] === b[0] && a[1] === b[1]
+    const C = setFrom<[number, string]>([[1, 'a'], [2, 'b'], [3, 'c'], [4, 'd'], [5, 'e'], [6, 'f'], [7, 'g']], comparator)
+    const D = setFrom<[number, string]>([[2, 'b'], [3, 'c'], [4, 'd'], [5, 'e'], [6, 'f'], [7, 'g'], [10, 'ten']], comparator)
+
+    expect(C.has([1, 'a'])).toBeTruthy()
+    expect(C.has([1, 'b'])).toBeFalsy()
+    expect(C.delete([1, 'a'])).toBeTruthy()
+    expect(C.has([1, 'a'])).toBeFalsy()
+
+    expect(C.add([10, 'ten']).equals(D)).toBeTruthy()
+})

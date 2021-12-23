@@ -1,3 +1,27 @@
+/**
+ * A {@link Set} with enhanced set operations that can be used anywhere a regular javascript
+ * set is required. This enhanced set provides additional set operations
+ * <ul>
+ *     <li>map, filter</li>
+ *     <li>union, intersection, compliment, symmetric difference, cartesian product</li>
+ *     <li>is subset, is proper subset</li>
+ *     <li>empty set</li>
+ *     <li>equality</li>
+ * </ul>
+ *
+ * When construction sets of objects or tuples, an optional comparator function can be supplied
+ * that is used for determining element equality. Operations with element equality will be a bit
+ * slower than operations on sets of primitive elements.
+ *
+ * @example
+ * const setA = setFrom([1, 2, 3, 5])
+ * const setB = setFrom([3, 4, 5, 6, 7])
+ *
+ * const unionAB = setA.union(setB)
+ * if (setA.union(setB).equals([1,2,3,4,5,6,7]) {
+ *     console.log("this will be true")
+ * }
+ */
 export interface WithOps<T> extends Set<T> {
     toSet: () => Set<T>
     toArray: () => Array<T>
@@ -95,10 +119,16 @@ export interface WithOps<T> extends Set<T> {
 type SetLike<T> = Set<T> | WithOps<T>
 type Collection<T> = SetLike<T> | ArrayLike<T>
 
-export function emptySet<T>(): WithOps<T> {
-    return setFrom<T>([])
+export function emptySet<T>(comparator?: (a: T, b: T) => boolean): WithOps<T> {
+    return setFrom<T>([], comparator)
 }
 
+/**
+ * Constructs a Set object with additional set operations
+ * @param collection The collection of elements
+ * @param comparator An optional comparator when building sets of objects
+ * @return A Set with operations
+ */
 export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) => boolean): WithOps<T> {
     const set = convertToSet(collection)
 
@@ -172,9 +202,9 @@ export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) 
 
         [Symbol.iterator]: () => set.values(),
         [Symbol.toStringTag]: "set",
-        add: (value: T) => setFrom(set.add(value)),
-        delete: (value: T) => set.delete(value),
-        has: (value: T) => set.has(value),
+        add: (value: T) => comparatorAdd(set, value, comparator),
+        delete: (value: T) => comparatorDelete(set, value, comparator),
+        has: (value: T) => comparatorHas(set, value, comparator),
         size: set.size,
 
         keys: () => set.keys(),
@@ -184,6 +214,42 @@ export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) 
         forEach: (callback: (value: T, key: T, set: Set<T>) => void, thisArg: any) => set.forEach(callback, thisArg),
         clear: () => set.clear()
     }
+}
+
+function comparatorHas<T>(setA: Set<T>, elem: T, comparator?: (a: T, b: T) => boolean): boolean {
+    if (comparator === undefined) {
+        return setA.has(elem)
+    }
+
+    for (let elemA of setA) {
+        if (comparator(elem, elemA)) {
+            return true
+        }
+    }
+    return false
+}
+
+function comparatorAdd<T>(set: Set<T>, elem: T, comparator?: (a: T, b: T) => boolean): WithOps<T> {
+    if (comparator === undefined) {
+        return setFrom(set.add(elem))
+    }
+    if (comparatorHas(set, elem, comparator)) {
+        return setFrom(set, comparator)
+    }
+    return setFrom(set.add(elem), comparator)
+}
+
+function comparatorDelete<T>(setA: Set<T>, elem: T, comparator?: (a: T, b: T) => boolean): boolean {
+    if (comparator === undefined) {
+        return setA.delete(elem)
+    }
+    for (let elemA of setA) {
+        if (comparator(elem, elemA)) {
+            setA.delete(elemA)
+            return true
+        }
+    }
+    return false
 }
 
 function convertToSet<T>(collection: Collection<T>): Set<T> {
