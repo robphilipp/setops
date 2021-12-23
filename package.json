@@ -1,6 +1,6 @@
 {
-  "name": "setops",
-  "version": "0.0.1",
+  "name": "setmath",
+  "version": "0.0.2",
   "description": "Set operations",
   "author": "Rob Philipp",
   "homepage": "https://github.com/robphilipp/setops",

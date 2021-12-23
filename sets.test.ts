@@ -184,3 +184,14 @@ test("should be able to check membership of objects", () => {
 
     expect(C.add([10, 'ten']).equals(D)).toBeTruthy()
 })
+
+test('hmm', () => {
+    const colors = setFrom(['red', 'green', 'blue'])
+    const models = setFrom(['accord', 'prius', 'corsstrek'])
+
+    console.log(colors.cartesianProduct(
+        models,
+        ([colorA, modelA], [colorB, modelB]) => colorA === colorB && modelA === modelB
+        ).toArray()
+    )
+})
