@@ -1,5 +1,1 @@
-export {
-    WithOps,
-    emptySet,
-    setFrom,
-} from './sets'
+export {WithOps, emptySet, setFrom} from './sets'
