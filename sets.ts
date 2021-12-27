@@ -32,20 +32,10 @@ export interface WithOps<T> extends Set<T> {
      * @return A new set (with ops) of transformed elements
      * @see mapType
      */
-    map: (callback: (value: T, index: number, s: SetLike<T>) => T) => WithOps<T>
-    /**
-     * Maps the set into a new set by applying the callback function to each element in the set. Note that
-     * this function differs from {@link map} only in the return type of the mapping, and is only needed
-     * to make the comparator types work.
-     * @param callback The callback function applied to each element
-     * @param comparator An optional comparator to be used when the elements mapped to are not primitives
-     * @return A new set (with ops) of transformed elements
-     * @see map
-     */
-    mapType: <U>(
-        callback: (value: T, index: number, s: SetLike<T>) => U,
+    map: <U>(
+        callback: (value: T, index: number, s: SetLike<T>) => T extends U ? T : U,
         comparator?: (a: U, b: U) => boolean
-    ) => WithOps<U>
+    ) => WithOps<T extends U ? T : U>
     /**
      * Calculates a new set containing only the elements the match the predicate function
      * @param callback The callback predicate function
@@ -166,17 +156,12 @@ export function emptySet<T>(comparator?: (a: T, b: T) => boolean): WithOps<T> {
  * @return A Set with operations
  */
 export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) => boolean): WithOps<T> {
-    const set = convertToSet(collection)
+    const set = convertToSet(collection, comparator)
 
-    function map(callback: (value: T, index: number, s: SetLike<T>) => T): WithOps<T> {
-        const fn = (value: T, index: number, array: Array<T>) => callback(value, index, convertToSet(array))
-        return setFrom(convertToArray(set).map(fn), comparator)
-    }
-
-    function mapType<U>(
-        callback: (value: T, index: number, s: SetLike<T>) => U,
+    function map<U>(
+        callback: (value: T, index: number, s: SetLike<T>) => T extends U ? T : U,
         comparator?: (a: U, b: U) => boolean
-    ): WithOps<U> {
+    ): WithOps<T extends U ? T : U> {
         const fn = (value: T, index: number, array: Array<T>) => callback(value, index, convertToSet(array))
         return setFrom(convertToArray(set).map(fn), comparator)
     }
@@ -231,7 +216,7 @@ export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) 
         toArray: () => convertToArray(set),
 
         map,
-        mapType,
+        // mapType,
         filter,
         reduce,
 
@@ -303,9 +288,15 @@ function comparatorDelete<T>(setA: Set<T>, elem: T, comparator?: (a: T, b: T) =>
     return false
 }
 
-function convertToSet<T>(collection: Collection<T>): Set<T> {
+function convertToSet<T>(collection: Collection<T>, comparator?: (a: T, b: T) => boolean): Set<T> {
     if (Array.isArray(collection)) {
-        return new Set(collection)
+        const set = new Set<T>()
+        collection.forEach(elem => {
+            if (!comparatorHas(set, elem, comparator)) {
+                set.add(elem)
+            }
+        })
+        return set
     }
     const set = collection as SetLike<T>
     return ('toSet' in set) ? set.toSet() : set

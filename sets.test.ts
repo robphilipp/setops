@@ -4,6 +4,17 @@ test("should be able to create a set with operations", () => {
     expect(setFrom([1, 2, 3, 4]).size).toBe(4)
     expect(setFrom(new Set([1, 2, 3, 4, 5, 5, 6])).size).toBe(6)
     expect(emptySet<number>().size).toBe(0)
+    type Lengthy = {string: string, length: number}
+    expect(setFrom([
+        {string: 'one', length: 3},
+        {string: 'two', length: 3},
+        {string: 'three', length: 5},
+        {string: 'four', length: 4},
+    ], (a: Lengthy, b: Lengthy) => a.length === b.length).toArray()).toEqual([
+        {string: 'one', length: 3},
+        {string: 'three', length: 5},
+        {string: 'four', length: 4},
+    ])
 })
 
 test("should be able to calculate what's not in a set", () => {
@@ -33,14 +44,41 @@ test("should be able to calculate what's not in a set", () => {
     expect(A.compliment(C).union(C.compliment(A)).equals(C.symmetricDifference(A))).toBeTruthy()
 })
 
-test("should be able to map a set", () => {
+test("should be able to map a set of same type", () => {
     const mapped = setFrom([1, 2, 3, 4]).map(value => value * 2)
     expect(mapped.toArray()).toEqual([2, 4, 6, 8])
 })
 
-test("should be able to map a set", () => {
-    const mapped = setFrom(['one', 'two', 'three', 'four']).mapType(value => value.length)
+test("should be able to map a set of different type", () => {
+    const mapped = setFrom(['one', 'two', 'three', 'four']).map(value => value.length)
     expect(mapped.equals(setFrom([3, 4, 5]))).toBeTruthy()
+})
+
+test("should be able to map a set of different type with comparator", () => {
+    type Lengthy = {string: string, length: number}
+    const mapped = setFrom(['one', 'two', 'three', 'four'])
+        .map(
+            value => ({string: value, length: value.length}),
+            (a: Lengthy, b: Lengthy) => a.string === b.string && a.length === b.length)
+    expect(mapped.equals(setFrom([
+        {string: 'one', length: 3},
+        {string: 'two', length: 3},
+        {string: 'three', length: 5},
+        {string: 'four', length: 4},
+    ]))).toBeTruthy()
+    const mapped2 = setFrom(['one', 'two', 'three', 'four'])
+        .map(
+            value => ({string: value, length: value.length}),
+            // the comparator only cares about length
+            (a: Lengthy, b: Lengthy) => a.length === b.length)
+
+    // because the comparator only cares about length, {string: 'one', length: 3} equals {string: 'two', length: 3}
+    expect(mapped2.equals(setFrom([
+        // {string: 'one', length: 3},
+        {string: 'two', length: 3},
+        {string: 'three', length: 5},
+        {string: 'four', length: 4},
+    ]))).toBeTruthy()
 })
 
 test("should be able to filter a set", () => {
