@@ -38,6 +38,11 @@ test("should be able to map a set", () => {
     expect(mapped.toArray()).toEqual([2, 4, 6, 8])
 })
 
+test("should be able to map a set", () => {
+    const mapped = setFrom(['one', 'two', 'three', 'four']).mapType(value => value.length)
+    expect(mapped.equals(setFrom([3, 4, 5]))).toBeTruthy()
+})
+
 test("should be able to filter a set", () => {
     const mapped = setFrom([1, 2, 3, 4]).filter(value => value % 2 === 0)
     expect(mapped.toArray()).toEqual([2, 4])
