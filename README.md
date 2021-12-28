@@ -1,5 +1,7 @@
 # set ops
 
+> For changes see [CHANGES.md](./CHANGES.md)
+
 Set ops provides an enhanced javascript/typescript Set that includes some basic set operations and enhancements to make it easy and fun to use. By construction, this set can be used anywhere a regular JS/TS set is required.
 
 To use the set, simply

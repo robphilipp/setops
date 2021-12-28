@@ -4,6 +4,26 @@ test("should be able to create a set with operations", () => {
     expect(setFrom([1, 2, 3, 4]).size).toBe(4)
     expect(setFrom(new Set([1, 2, 3, 4, 5, 5, 6])).size).toBe(6)
     expect(emptySet<number>().size).toBe(0)
+})
+
+test("creating a set of objects without comparator will have duplicates in the expected sense", () => {
+    expect(setFrom([
+        {string: 'one', length: 3},
+        {string: 'one', length: 3},
+        {string: 'two', length: 3},
+        {string: 'three', length: 5},
+        {string: 'four', length: 4},
+    ]).toArray()).toEqual([
+        {string: 'one', length: 3},
+        // and a duplication in the "expected" sense (need to use comparator)
+        {string: 'one', length: 3},
+        {string: 'two', length: 3},
+        {string: 'three', length: 5},
+        {string: 'four', length: 4},
+    ])
+})
+
+test("should be able to create a set with operations using a comparator for equality", () => {
     type Lengthy = {string: string, length: number}
     expect(setFrom([
         {string: 'one', length: 3},
@@ -88,7 +108,7 @@ test("should be able to filter a set", () => {
 
 test("should be able to reduce a set", () => {
     const A = setFrom([1,2,3,4,5,6,7,8,9,10])
-    expect(A.reduce((sum, value) => sum += value)).toBe(55)
+    expect(A.reduce((sum, value) => sum + value)).toBe(55)
 })
 
 test("should be able to calculate the union of sets", () => {

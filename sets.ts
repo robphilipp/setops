@@ -142,6 +142,14 @@ export interface WithOps<T> extends Set<T> {
 type SetLike<T> = Set<T> | WithOps<T>
 type Collection<T> = SetLike<T> | ArrayLike<T>
 
+/**
+ * Returns an empty set of the specified type, with the optionally specified comparator.
+ * @param comparator An optional comparator when building sets of objects. When constructing
+ * sets of objects, arrays, or tuples, it is good practice supplying a comparator that defines
+ * the equality of elements in the set. Without the comparator, equality is based on the object
+ * reference, and the results will be unexpected.
+ * @return A {@link Set} with additional operations
+ */
 export function emptySet<T>(comparator?: (a: T, b: T) => boolean): WithOps<T> {
     return setFrom<T>([], comparator)
 }
@@ -153,7 +161,7 @@ export function emptySet<T>(comparator?: (a: T, b: T) => boolean): WithOps<T> {
  * sets of objects, arrays, or tuples, it is good practice supplying a comparator that defines
  * the equality of elements in the set. Without the comparator, equality is based on the object
  * reference, and the results will be unexpected.
- * @return A Set with operations
+ * @return A {@link Set} with additional operations
  */
 export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) => boolean): WithOps<T> {
     const set = convertToSet(collection, comparator)
@@ -216,7 +224,6 @@ export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) 
         toArray: () => convertToArray(set),
 
         map,
-        // mapType,
         filter,
         reduce,
 
@@ -252,12 +259,25 @@ export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) 
     }
 }
 
-function comparatorHas<T>(setA: Set<T>, elem: T, comparator?: (a: T, b: T) => boolean): boolean {
+/**
+ * Determines whether the specified set has the specified element. Whether a set has the specified
+ * element depends on the comparator. When *no* comparator is specified, then a set *has* the element
+ * when the set contains an element that is equal to the specified element using javascript's strict
+ * equality measure. When a comparator is specified, then a set *has* the element when the set contains
+ * an element that is equal to the specified element using the comparator's equality measure
+ * @param set The set to check
+ * @param elem The element to check for membership
+ * @param comparator The optional comparator used to check for equality
+ * @return `true` if the specified element is a member of the specified set; `false` otherwise
+ */
+function comparatorHas<T>(set: Set<T>, elem: T, comparator?: (a: T, b: T) => boolean): boolean {
+    // when no comparator is specified, then shortcut the more expensive operation below, and
+    // just use the standard Set.has(...) method.
     if (comparator === undefined) {
-        return setA.has(elem)
+        return set.has(elem)
     }
 
-    for (let elemA of setA) {
+    for (let elemA of set) {
         if (comparator(elem, elemA)) {
             return true
         }
@@ -265,6 +285,13 @@ function comparatorHas<T>(setA: Set<T>, elem: T, comparator?: (a: T, b: T) => bo
     return false
 }
 
+/**
+ * Adds an element to the set when the element is *not* already a member of the set.
+ * @param set The set to which to add the element
+ * @param elem The element to add to the set
+ * @param comparator The optional comparator used to check for equality
+ * @return A {@link Set} with additional operations
+ */
 function comparatorAdd<T>(set: Set<T>, elem: T, comparator?: (a: T, b: T) => boolean): WithOps<T> {
     if (comparator === undefined) {
         return setFrom(set.add(elem))
@@ -275,21 +302,45 @@ function comparatorAdd<T>(set: Set<T>, elem: T, comparator?: (a: T, b: T) => boo
     return setFrom(set.add(elem), comparator)
 }
 
-function comparatorDelete<T>(setA: Set<T>, elem: T, comparator?: (a: T, b: T) => boolean): boolean {
+/**
+ * Deletes an element from the set if the element is a member of the set under the comparator equality.
+ * @param set The set from which to remove the element
+ * @param elem The element to remove from the set
+ * @param comparator The optional comparator used to check for equality
+ * @return `true` if the element was removed; `false` otherwise
+ */
+function comparatorDelete<T>(set: Set<T>, elem: T, comparator?: (a: T, b: T) => boolean): boolean {
     if (comparator === undefined) {
-        return setA.delete(elem)
+        return set.delete(elem)
     }
-    for (let elemA of setA) {
+    for (let elemA of set) {
         if (comparator(elem, elemA)) {
-            setA.delete(elemA)
+            set.delete(elemA)
             return true
         }
     }
     return false
 }
 
+/**
+ * Converts the collection (set, withOps, array-like) to a set. The optional `comparator` should be
+ * provided when javascript's equality measure is insufficient for comparing the set's elements. For
+ * example, when the set is an element of objects of some type T, and you would like the equality to
+ * compare the values in that object.
+ * @param collection The collection of elements
+ * @param comparator An optional comparator for determining whether elements in a set are equal. The
+ * comparator is used to ensure that a set does not have duplicate elements, under the comparator's
+ * equality measure.
+ * @return A {@link Set}
+ */
 function convertToSet<T>(collection: Collection<T>, comparator?: (a: T, b: T) => boolean): Set<T> {
     if (Array.isArray(collection)) {
+        // when there is no comparator defined, the short circuit the slower set construction below
+        if (comparator === null) {
+            return new Set(collection)
+        }
+
+        // deduplicate the elements in the array, using the comparator as an equality measure.
         const set = new Set<T>()
         collection.forEach(elem => {
             if (!comparatorHas(set, elem, comparator)) {

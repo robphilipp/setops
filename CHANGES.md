@@ -1,5 +1,8 @@
 # change log
 
+## version 0.0.4 (performance)
+Small change to the `convertToSet(...)` function to shortcut the more expensive set creation when no `comparator` is defined.
+
 ## version 0.0.3 (map T -> U, bug fix)
 1. Update the `map` function to allow mapping elements from a type `T` to a type `U`, which was not allow previously. This also means that when type `U` is not a primitive, an optional `comparator` callback function can now be supplied.
 
