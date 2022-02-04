@@ -189,3 +189,23 @@ const comparator = ([colorA, modelA], [colorB, modelB]) => colorA === colorB && 
 */
 console.log(colors.cartesianProduct(models, comparator))
 ```
+
+Suppose you would like to enumerate all the combinations from a set of sets. Then the `enumerateCombinations<T>(...sets: Array<SetWithOps<T>>): Array<SetWithOps<T>>` function is what you're looking for. This function enumerates the combinations of the sets. For example, given the sets `A = {a1}`, `B = {b1, b2}`, and `C = {c1, c2}`. Then this function will generate `[{a1, b1, c1}, {a1, b1, c1}, {a1, b2, c1}, {a1, b2, c2}]`.
+
+```ts
+const combos = enumerateCombinations(
+    setFrom(['a1', 'a2']),
+    setFrom(['b1', 'b2']),
+    setFrom(['c1', 'c2']),
+)
+expect(combos).toEqual([
+    setFrom(['a1', 'b1', 'c1']),
+    setFrom(['a1', 'b1', 'c2']),
+    setFrom(['a1', 'b2', 'c1']),
+    setFrom(['a1', 'b2', 'c2']),
+    setFrom(['a2', 'b1', 'c1']),
+    setFrom(['a2', 'b1', 'c2']),
+    setFrom(['a2', 'b2', 'c1']),
+    setFrom(['a2', 'b2', 'c2']),
+])
+```

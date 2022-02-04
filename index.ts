@@ -1,1 +1,2 @@
-export {WithOps, emptySet, setFrom} from './sets'
+export type {SetWithOps, WithOps} from './sets'
+export {emptySet, setFrom, enumerateCombinations} from './sets'

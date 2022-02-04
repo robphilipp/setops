@@ -1,4 +1,9 @@
 /**
+ * @deprecated
+ */
+export type WithOps<T> = SetWithOps<T>
+
+/**
  * A {@link Set} with enhanced set operations that can be used anywhere a regular javascript
  * set is required. This enhanced set provides additional set operations
  * <ul>
@@ -22,7 +27,7 @@
  *     console.log("this will be true")
  * }
  */
-export interface WithOps<T> extends Set<T> {
+export interface SetWithOps<T> extends Set<T> {
     toSet: () => Set<T>
     toArray: () => Array<T>
 
@@ -35,13 +40,13 @@ export interface WithOps<T> extends Set<T> {
     map: <U>(
         callback: (value: T, index: number, s: SetLike<T>) => T extends U ? T : U,
         comparator?: (a: U, b: U) => boolean
-    ) => WithOps<T extends U ? T : U>
+    ) => SetWithOps<T extends U ? T : U>
     /**
      * Calculates a new set containing only the elements the match the predicate function
      * @param callback The callback predicate function
      * @return A new set (with ops) with only the elements that match the predicate
      */
-    filter: (callback: (value: T, index: number, s: SetLike<T>) => boolean) => WithOps<T>
+    filter: (callback: (value: T, index: number, s: SetLike<T>) => boolean) => SetWithOps<T>
     /**
      * Calculates a value from the set by applying the reducing function to the elements
      * @param callback The reducing callback
@@ -59,7 +64,7 @@ export interface WithOps<T> extends Set<T> {
      * @param b The other set
      * @return The elements of this set that are not in `b`
      */
-    compliment: (b: SetLike<T>) => WithOps<T>
+    compliment: (b: SetLike<T>) => SetWithOps<T>
     /**
      * Calculates the symmetric difference between this set and the other set. For example, if
      * this set is denoted as `A` and the other set is denoted as `B`, then `A` symmetric difference `B`,
@@ -69,7 +74,7 @@ export interface WithOps<T> extends Set<T> {
      * @return The union of the elements of this set that are not in `b` and the elements of `b`
      * that are not in this set.
      */
-    symmetricDifference: (b: SetLike<T>) => WithOps<T>
+    symmetricDifference: (b: SetLike<T>) => SetWithOps<T>
     /**
      * Calculates the elements of this set that are also in the other set, `b`. For example, if this
      * set is denoted as `A` and the other set as `B`, then `A` intersection `B`, or `A ∩ B`, are the
@@ -77,7 +82,7 @@ export interface WithOps<T> extends Set<T> {
      * @param b The other set
      * @return the elements of this set that are also in the set `b`
      */
-    intersection: (b: SetLike<T>) => WithOps<T>
+    intersection: (b: SetLike<T>) => SetWithOps<T>
     /**
      * Calculates a new set consisting of the elements of this set and all the elements in the other set.
      * For example, if this set is denoted as `A` and the other set as `B`, then `A` union `B`, or
@@ -85,14 +90,14 @@ export interface WithOps<T> extends Set<T> {
      * @param b The other set
      * @return a new set consisting of the elements of this set and all the elements in the other set
      */
-    union: (b: SetLike<T>) => WithOps<T>
+    union: (b: SetLike<T>) => SetWithOps<T>
     /**
      * Calculates the cartesion product of this set with the other set. For example, if this set is denoted
      * by `A` and the other set by `B`, then `A` cartesian product `B`, or `A × B`, is the set of all the
      * possible element pairs
      * @param b
      */
-    cartesianProduct: <B>(b: SetLike<B>, comparator: (a: [T, B], b: [T, B]) => boolean) => WithOps<[T, B]>
+    cartesianProduct: <B>(b: SetLike<B>, comparator: (a: [T, B], b: [T, B]) => boolean) => SetWithOps<[T, B]>
     /**
      * Calculates if the other set has all the elements found in this set. For example, if this set is
      * denoted as `A` and the other set is denoted as `B`, then `A` is subset of `B`, or `A ⊆ B`, evaluates
@@ -139,7 +144,7 @@ export interface WithOps<T> extends Set<T> {
     cardinality: number
 }
 
-type SetLike<T> = Set<T> | WithOps<T>
+type SetLike<T> = Set<T> | SetWithOps<T>
 type Collection<T> = SetLike<T> | ArrayLike<T>
 
 /**
@@ -150,7 +155,7 @@ type Collection<T> = SetLike<T> | ArrayLike<T>
  * reference, and the results will be unexpected.
  * @return A {@link Set} with additional operations
  */
-export function emptySet<T>(comparator?: (a: T, b: T) => boolean): WithOps<T> {
+export function emptySet<T>(comparator?: (a: T, b: T) => boolean): SetWithOps<T> {
     return setFrom<T>([], comparator)
 }
 
@@ -163,18 +168,18 @@ export function emptySet<T>(comparator?: (a: T, b: T) => boolean): WithOps<T> {
  * reference, and the results will be unexpected.
  * @return A {@link Set} with additional operations
  */
-export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) => boolean): WithOps<T> {
+export function setFrom<T>(collection: Collection<T> | ReadonlySet<T>, comparator?: (a: T, b: T) => boolean): SetWithOps<T> {
     const set = convertToSet(collection, comparator)
 
     function map<U>(
         callback: (value: T, index: number, s: SetLike<T>) => T extends U ? T : U,
         comparator?: (a: U, b: U) => boolean
-    ): WithOps<T extends U ? T : U> {
+    ): SetWithOps<T extends U ? T : U> {
         const fn = (value: T, index: number, array: Array<T>) => callback(value, index, convertToSet(array))
         return setFrom(convertToArray(set).map(fn), comparator)
     }
 
-    function filter(callback: (value: T, index: number, s: SetLike<T>) => boolean): WithOps<T> {
+    function filter(callback: (value: T, index: number, s: SetLike<T>) => boolean): SetWithOps<T> {
         const fn = (value: T, index: number, array: Array<T>) => callback(value, index, convertToSet(array))
         return setFrom(convertToArray(set).filter(fn), comparator)
     }
@@ -184,23 +189,23 @@ export function setFrom<T>(collection: Collection<T>, comparator?: (a: T, b: T) 
         return convertToArray(set).reduce(fn)
     }
 
-    function compliment(b: SetLike<T>): WithOps<T> {
+    function compliment(b: SetLike<T>): SetWithOps<T> {
         return setFrom(calculateNotIn(set, b, comparator), comparator)
     }
 
-    function symmetricDifference(b: SetLike<T>): WithOps<T> {
+    function symmetricDifference(b: SetLike<T>): SetWithOps<T> {
         return setFrom(calculateUnion(calculateNotIn(set, b, comparator), calculateNotIn(b, set, comparator)), comparator)
     }
 
-    function intersection(b: SetLike<T>): WithOps<T> {
+    function intersection(b: SetLike<T>): SetWithOps<T> {
         return setFrom(calculateIntersection(set, b, comparator), comparator)
     }
 
-    function union(b: SetLike<T>): WithOps<T> {
+    function union(b: SetLike<T>): SetWithOps<T> {
         return setFrom(calculateUnion(set, b, comparator), comparator)
     }
 
-    function cartesianProduct<B>(b: SetLike<B>, comparator: (a: [T, B], b: [T, B]) => boolean): WithOps<[T, B]> {
+    function cartesianProduct<B>(b: SetLike<B>, comparator: (a: [T, B], b: [T, B]) => boolean): SetWithOps<[T, B]> {
         return setFrom<[T, B]>(calculateCartesianProduct<T, B>(set, b), comparator)
     }
 
@@ -292,7 +297,7 @@ function comparatorHas<T>(set: Set<T>, elem: T, comparator?: (a: T, b: T) => boo
  * @param comparator The optional comparator used to check for equality
  * @return A {@link Set} with additional operations
  */
-function comparatorAdd<T>(set: Set<T>, elem: T, comparator?: (a: T, b: T) => boolean): WithOps<T> {
+function comparatorAdd<T>(set: Set<T>, elem: T, comparator?: (a: T, b: T) => boolean): SetWithOps<T> {
     if (comparator === undefined) {
         return setFrom(set.add(elem))
     }
@@ -333,7 +338,7 @@ function comparatorDelete<T>(set: Set<T>, elem: T, comparator?: (a: T, b: T) => 
  * equality measure.
  * @return A {@link Set}
  */
-function convertToSet<T>(collection: Collection<T>, comparator?: (a: T, b: T) => boolean): Set<T> {
+function convertToSet<T>(collection: Collection<T> | ReadonlySet<T>, comparator?: (a: T, b: T) => boolean): Set<T> {
     if (Array.isArray(collection)) {
         // when there is no comparator defined, the short circuit the slower set construction below
         if (comparator === null) {
@@ -353,7 +358,7 @@ function convertToSet<T>(collection: Collection<T>, comparator?: (a: T, b: T) =>
     return ('toSet' in set) ? set.toSet() : set
 }
 
-function convertToArray<T>(collection: Collection<T>): Array<T> {
+function convertToArray<T>(collection: Collection<T> | ReadonlySet<T>): Array<T> {
     if (Array.isArray(collection)) {
         return [...collection]
     }
@@ -365,7 +370,7 @@ function calculateIntersection<T>(setA: Set<T>, setB: SetLike<T>, comparator?: (
     if (comparator !== undefined) {
         for (let elemA of setA) {
             for (let elemB of setB) {
-                if (comparator(elemA, elemB)) {
+                if (comparator!(elemA, elemB)) {
                     intersection.add(elemA)
                     break
                 }
@@ -387,7 +392,7 @@ function calculateUnion<T>(setA: Set<T>, setB: SetLike<T>, comparator?: (a: T, b
         for (let elemB of setB) {
             let found = false
             for (let elemA of setA) {
-                if (comparator(elemA, elemB)) {
+                if (comparator!(elemA, elemB)) {
                     found= true
                     break
                 }
@@ -423,11 +428,36 @@ function calculateNotIn<T>(setA: Set<T>, setB: SetLike<T>, comparator?: (a: T, b
 }
 
 function calculateCartesianProduct<T, B>(setA: Set<T>, setB: SetLike<B>): Set<[T, B]> {
-    const product = new Set<[T, B]>()
-    for (let elemA of setA) {
-        for (let elemB of setB) {
-            product.add([elemA, elemB] as [T, B])
+    return setFrom(
+        Array.from(setA).flatMap(a => Array.from(setB).map(b => [a, b] as [T, B]))
+    )
+}
+
+/**
+ * Enumerates the combinations of the sets. For example, given the sets `A = {a1}`, `B = {b1, b2}`,
+ * and `C = {c1, c2}`. Then this function will generate `[{a1, b1, c1}, {a1, b1, c1}, {a1, b2, c1},
+ * {a1, b2, c2}]`.
+ * @param sets The sets to combine
+ * @return An array holds the combined sets.
+ */
+export function enumerateCombinations<T>(...sets: Array<SetWithOps<T>>): Array<SetWithOps<T>> {
+    const enumerations: Array<Array<T>> = []
+    const max = sets.length - 1;
+    const matrix = sets.map(set => set.toArray())
+
+    function enumerate(enumeration: Array<T>, n: number): void {
+        for (let j = 0, l = matrix[n].length; j < l; j++) {
+            const combination: Array<T> = enumeration.slice(0)
+            combination.push(matrix[n][j])
+            if (n === max) {
+                enumerations.push(combination)
+            }
+            else {
+                enumerate(combination, n + 1);
+            }
         }
     }
-    return product
+
+    enumerate([], 0);
+    return enumerations.map(combo => setFrom(combo));
 }

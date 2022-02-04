@@ -1,4 +1,4 @@
-import {emptySet, setFrom} from "./sets";
+import {emptySet, enumerateCombinations, setFrom} from "./sets";
 
 test("should be able to create a set with operations", () => {
     expect(setFrom([1, 2, 3, 4]).size).toBe(4)
@@ -24,7 +24,7 @@ test("creating a set of objects without comparator will have duplicates in the e
 })
 
 test("should be able to create a set with operations using a comparator for equality", () => {
-    type Lengthy = {string: string, length: number}
+    type Lengthy = { string: string, length: number }
     expect(setFrom([
         {string: 'one', length: 3},
         {string: 'two', length: 3},
@@ -46,10 +46,10 @@ test("should be able to calculate what's not in a set", () => {
     expect(A.compliment(B).equals(setFrom([1]))).toBeTruthy()
 
     // if B is a subset of A, then B\A (elements of B that are not in A) is an empty set
-    expect(B.isSubsetOf(A) && B.compliment(A).equals(emptySet())).toBeTruthy()
+    expect(B.isSubsetOf(A) && B.compliment(A).equals(emptySet<number>())).toBeTruthy()
 
     // when B is a proper subset of A, then B\A (elements of B that are not in A) is an empty set
-    expect(B.compliment(A).equals(emptySet())).toBeTruthy()
+    expect(B.compliment(A).equals(emptySet<number>())).toBeTruthy()
 
     // when C is not a subset of A, then C\A (elements of C that are not in A) is not an empty set
     expect(C.compliment(A).equals(setFrom([5]))).toBeTruthy()
@@ -57,7 +57,7 @@ test("should be able to calculate what's not in a set", () => {
     expect(A.compliment(C).notEquals(C.compliment(A))).toBeTruthy()
 
     // (empty set)\A = empty set
-    expect(emptySet().compliment(A).equals(emptySet())).toBeTruthy()
+    expect(emptySet().compliment(A).equals(emptySet<number>())).toBeTruthy()
 
     // A ∆ B = A\C union C\A = B ∆ A
     expect(A.compliment(C).union(C.compliment(A)).equals(A.symmetricDifference(C))).toBeTruthy()
@@ -75,7 +75,7 @@ test("should be able to map a set of different type", () => {
 })
 
 test("should be able to map a set of different type with comparator", () => {
-    type Lengthy = {string: string, length: number}
+    type Lengthy = { string: string, length: number }
     const mapped = setFrom(['one', 'two', 'three', 'four'])
         .map(
             value => ({string: value, length: value.length}),
@@ -107,7 +107,7 @@ test("should be able to filter a set", () => {
 })
 
 test("should be able to reduce a set", () => {
-    const A = setFrom([1,2,3,4,5,6,7,8,9,10])
+    const A = setFrom([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     expect(A.reduce((sum, value) => sum + value)).toBe(55)
 })
 
@@ -121,7 +121,7 @@ test("should be able to calculate the union of sets", () => {
     expect(A.isSubsetOf(A.union(B))).toBeTruthy()
     expect(A.isProperSubsetOf(A.union(B))).toBeTruthy()
     expect(A.union(A).equals(A)).toBeTruthy()
-    expect(A.union(emptySet()).equals(A)).toBeTruthy()
+    expect(A.union(emptySet<number>()).equals(A)).toBeTruthy()
 
     expect(A.isSubsetOf(B) && A.union(B).notEquals(B)).toBeFalsy()
     expect(A.isSubsetOf(C) && A.union(C).equals(C)).toBeTruthy()
@@ -138,7 +138,7 @@ test("should be able to calculate the union of sets with comparator", () => {
     expect(A.isSubsetOf(A.union(B))).toBeTruthy()
     expect(A.isProperSubsetOf(A.union(B))).toBeTruthy()
     expect(A.union(A).equals(A)).toBeTruthy()
-    expect(A.union(emptySet()).equals(A)).toBeTruthy()
+    expect(A.union(emptySet<[number, string]>()).equals(A)).toBeTruthy()
 
     expect(A.isSubsetOf(B) && A.union(B).notEquals(B)).toBeFalsy()
     expect(A.isSubsetOf(C) && A.union(C).equals(C)).toBeTruthy()
@@ -162,7 +162,7 @@ test("should be able to calculate the intersection of sets", () => {
     expect(A.intersection(A).equals(A)).toBeTruthy()
 
     // A intersection with an empty set is an empty set
-    expect(A.intersection(emptySet()).equals(emptySet())).toBeTruthy()
+    expect(A.intersection(emptySet<number>()).equals(emptySet<number>())).toBeTruthy()
 
     // A is a subset of B iff A intersection B = A
     expect(!A.isSubsetOf(B) && A.intersection(B).notEquals(A)).toBeTruthy()
@@ -196,8 +196,8 @@ test("should be able to add and remove elements from a set", () => {
 })
 
 test("should be able to test subset and equality", () => {
-    const setA = setFrom([1,2,3,4,5,6])
-    const setB = setFrom([3,4,6,7,8,10])
+    const setA = setFrom([1, 2, 3, 4, 5, 6])
+    const setB = setFrom([3, 4, 6, 7, 8, 10])
     const setC = setA.intersection(setB)
 
     // a set should equal itself
@@ -232,7 +232,7 @@ function testSetSize(a: Set<number>): number {
 }
 
 test("should be able to call a function that accepts a Set", () => {
-    expect(testSetSize(setFrom([1,2,3,4]))).toBe(4)
+    expect(testSetSize(setFrom([1, 2, 3, 4]))).toBe(4)
 })
 
 test("should be able to check membership of objects", () => {
@@ -246,4 +246,30 @@ test("should be able to check membership of objects", () => {
     expect(C.has([1, 'a'])).toBeFalsy()
 
     expect(C.add([10, 'ten']).equals(D)).toBeTruthy()
+})
+
+describe("when enumerating the possible combinations from a set of sets", () => {
+
+    it("should be able to enumerate the combinations from several sets", () => {
+        const combos = enumerateCombinations(setFrom(['a1']), setFrom(['b1', 'b2']))
+        expect(combos).toEqual([setFrom(['a1', 'b1']), setFrom(['a1', 'b2'])])
+    })
+
+    it("should be able to enumerate the combinations from several sets", () => {
+        const combos = enumerateCombinations(
+            setFrom(['a1', 'a2']),
+            setFrom(['b1', 'b2']),
+            setFrom(['c1', 'c2']),
+        )
+        expect(combos).toEqual([
+            setFrom(['a1', 'b1', 'c1']),
+            setFrom(['a1', 'b1', 'c2']),
+            setFrom(['a1', 'b2', 'c1']),
+            setFrom(['a1', 'b2', 'c2']),
+            setFrom(['a2', 'b1', 'c1']),
+            setFrom(['a2', 'b1', 'c2']),
+            setFrom(['a2', 'b2', 'c1']),
+            setFrom(['a2', 'b2', 'c2']),
+        ])
+    })
 })

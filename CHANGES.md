@@ -1,5 +1,10 @@
 # change log
 
+## version 0.1.0 (modules cleanup)
+1. Updated the `tsconfig.json` file to build the modules properly.
+2. Renamed `WithOps<T>` to `SetWithOps<T>` to make the meaning clearer. `WithOps` is now deprecated, but still available. Please update your code.
+3. Added method that calculates the combinations of elements drawn from a set of sets (`enumerateCombinations(...)`).
+
 ## version 0.0.4 (performance)
 Small change to the `convertToSet(...)` function to shortcut the more expensive set creation when no `comparator` is defined.
 
