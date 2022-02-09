@@ -9,7 +9,7 @@ To use the set, simply
 npm install setmath
 ```
 
-In your modules, `import {WithOps, emptySet, setFrom} from 'setops'` and then use the factory function to create the set
+In your modules, `import {SetWithOps, emptySet, setFrom} from 'setops'` and then use the factory function to create the set
 ```ts
 const setA = setFrom([1, 2, 3, 5])
 const setB = setFrom([1, 3, 5, 7, 8])
@@ -51,7 +51,7 @@ C.add([10, 'ten']).equals(D)
 
 ## using `setmath`
 
-The `WithOps<T>` returned from the `setmath` factory functions extends the Javascript Set object, adding useful operations and convenience methods. Consequently, it can be passed into any function that requires a type Set as an argument.
+The `SetWithOps<T>` returned from the `setmath` factory functions extends the Javascript Set object, adding useful operations and convenience methods. Consequently, it can be passed into any function that requires a type Set as an argument.
 
 ### creation
 
@@ -86,7 +86,7 @@ The `setFrom(...)` function returns an enhanced set. When creating sets from pri
 const pi = setFrom([3, 1, 4, 1, 5, 9])
 ```
 
-The `setFrom(...)` accepts array, sets, and other `WithOps` objects from which it creates the set.
+The `setFrom(...)` accepts array, sets, and other `SetWithOps` objects from which it creates the set.
 ```ts
 const pi1 = setFrom([3, 1, 4, 1, 5, 9])
 const pi2 = setFrom(new Set([3, 1, 4, 1, 5, 9]))

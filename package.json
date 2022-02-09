@@ -1,20 +1,17 @@
 {
   "name": "setmath",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Set operations",
   "author": "Rob Philipp",
   "homepage": "https://github.com/robphilipp/setops",
   "license": "MIT",
   "repository": "github:robphilipp/setops",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "prepare": "npm run build",
     "build": "tsc",
     "test": "jest sets.test.ts"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
   },
   "browserslist": {
     "production": [

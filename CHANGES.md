@@ -1,5 +1,9 @@
 # change log
 
+## version 0.1.1 (modules tweak)
+1. Fixed incorrect paths
+2. Added semicolons to end of exports
+
 ## version 0.1.0 (modules cleanup)
 1. Updated the `tsconfig.json` file to build the modules properly.
 2. Renamed `WithOps<T>` to `SetWithOps<T>` to make the meaning clearer. `WithOps` is now deprecated, but still available. Please update your code.
