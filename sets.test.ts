@@ -250,9 +250,9 @@ test("should be able to check membership of objects", () => {
 
 describe("when enumerating the possible combinations from a set of sets", () => {
 
-    it("should be able to enumerate the combinations from several sets", () => {
-        const combos = enumerateCombinations(setFrom(['a1']), setFrom(['b1', 'b2']))
-        expect(combos).toEqual([setFrom(['a1', 'b1']), setFrom(['a1', 'b2'])])
+    it("should be able to do a simple enumeration the combinations from two sets", () => {
+        const combos = enumerateCombinations(setFrom(['A1']), setFrom(['B1', 'B2']))
+        expect(combos).toEqual([setFrom(['A1', 'B1']), setFrom(['A1', 'B2'])])
     })
 
     it("should be able to enumerate the combinations from several sets", () => {

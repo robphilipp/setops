@@ -447,7 +447,7 @@ export function enumerateCombinations<T>(...sets: Array<SetWithOps<T>>): Array<S
 
     function enumerate(enumeration: Array<T>, n: number): void {
         for (let j = 0, l = matrix[n].length; j < l; j++) {
-            const combination: Array<T> = enumeration.slice(0)
+            const combination: Array<T> = enumeration.slice()
             combination.push(matrix[n][j])
             if (n === max) {
                 enumerations.push(combination)
